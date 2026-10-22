@@ -7,7 +7,7 @@ const app = createApp({
   demo: process.env.DEMO_MODE !== 'false',
   secureCookies: process.env.SECURE_COOKIES === 'true',
 });
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' || process.argv.includes('--production')) {
   app.use(express.static(resolve('dist')));
   app.get('/{*path}', (_, res) => res.sendFile(resolve('dist/index.html')));
 } else {
@@ -20,7 +20,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 const port = Number(process.env.PORT || 3000);
 const server = createServer(app);
-server.listen(port, '0.0.0.0', () => console.log(`BrainADZ People listening on port ${port}`));
+server.listen(port, process.env.HOST || '0.0.0.0', () =>
+  console.log(`BrainADZ People listening on port ${port}`),
+);
 process.on('SIGTERM', () =>
   server.close(() => {
     app.locals.db.close();

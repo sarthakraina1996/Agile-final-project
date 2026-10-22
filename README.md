@@ -2,6 +2,19 @@
 
 A responsive HR workspace for **BrainADZ Marketing, BrainADZ Exhibits and BrainADZ Live**. Built with React, Vite, Express and persistent SQLite storage. The supplied company presentations informed the three verticals and their visual identities; sample personnel and policies are fictional.
 
+## Run on your own computer
+
+Install **Node.js 24 LTS** from https://nodejs.org. Download this repository using **Code → Download ZIP** on GitHub and extract it into a folder you can write to.
+
+- **Windows:** double-click `start-local.cmd` in the extracted folder.
+- **macOS:** double-click `start-local.command`. If macOS will not open it, open Terminal in the extracted folder and run `sh start-local.command`.
+- **Linux:** open a terminal in the extracted folder and run `sh start-local.command`.
+- **Any platform:** open a terminal in the extracted folder and run `npm run local`.
+
+The launcher installs dependencies if they are missing, builds the app, starts a server bound to your computer and opens **http://localhost:3000** in your default browser. Internet access is needed for the first dependency installation. Keep the terminal window open; press **Ctrl+C** to stop. The demo buttons are available on the login page. Local HTTP uses non-Secure cookies; hosted HTTPS continues using the configured secure-cookie setting.
+
+Records are saved in `.data/brainadz.sqlite` in your local app folder. Keep that folder to retain your records. Render access and a Render API key are not needed to run locally. If port 3000 is occupied, run `npm run local -- --port=3002`. Use `--no-open` to start without opening a browser.
+
 ## Run
 
 Requires Node.js 22.13+ with `node:sqlite` (tested with Node 24).

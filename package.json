@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "node server/index.js",
     "build": "vite build",
-    "start": "NODE_ENV=production node server/index.js",
+    "start": "node server/index.js --production",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
-    "admin:create": "node server/create-admin.js"
+    "admin:create": "node server/create-admin.js",
+    "local": "node scripts/start-local.js"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.3.0",
