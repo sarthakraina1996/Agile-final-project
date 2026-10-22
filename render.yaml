@@ -1,0 +1,27 @@
+# Public demonstration deployment. Starter hosting and the persistent disk are paid.
+# Keep DEMO_MODE=true restricted to sample data; see README.md for company setup.
+services:
+  - type: web
+    name: brainadz-people
+    runtime: node
+    plan: starter
+    region: singapore
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/auth/config
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+      - key: NODE_ENV
+        value: production
+      - key: SECURE_COOKIES
+        value: 'true'
+      - key: DEMO_MODE
+        value: 'true'
+      - key: DATABASE_PATH
+        value: /var/data/brainadz.sqlite
+    disk:
+      name: brainadz-data
+      mountPath: /var/data
+      sizeGB: 1
