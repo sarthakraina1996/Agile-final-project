@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 async function signIn(page, role = 'Admin') {
-  await page.goto('/');
+  await page.goto('/hr');
   await page.getByRole('button', { name: role, exact: true }).click();
   await expect(page.getByRole('heading', { name: /Good (morning|afternoon)/ })).toBeVisible();
 }
@@ -102,7 +102,7 @@ test('payroll and document downloads are real', async ({ page }) => {
 });
 test('mobile navigation and layouts stay within the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/hr');
   await page.screenshot({ path: '/tmp/brainadz-login-mobile.png', fullPage: true });
   await page.getByRole('button', { name: 'Admin', exact: true }).click();
   await expect(page.getByRole('heading', { name: /Good (morning|afternoon)/ })).toBeVisible();

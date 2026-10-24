@@ -1,0 +1,33 @@
+CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS properties(id TEXT PRIMARY KEY,code TEXT UNIQUE NOT NULL,name TEXT NOT NULL,legal_entity TEXT NOT NULL,city TEXT,country TEXT,currency TEXT NOT NULL,timezone TEXT NOT NULL,tax_rate INTEGER NOT NULL DEFAULT 1200,check_in_time TEXT DEFAULT '14:00',check_out_time TEXT DEFAULT '11:00',requires_inspection INTEGER DEFAULT 1);
+CREATE TABLE IF NOT EXISTS buildings(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS floors(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),building_id TEXT REFERENCES buildings(id),number INTEGER,name TEXT);
+CREATE TABLE IF NOT EXISTS room_types(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),name TEXT NOT NULL,base_rate INTEGER NOT NULL CHECK(base_rate>=0),adults INTEGER DEFAULT 2,children INTEGER DEFAULT 1,area REAL,bed TEXT,amenities TEXT NOT NULL DEFAULT '[]');
+CREATE TABLE IF NOT EXISTS rooms(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),type_id TEXT NOT NULL REFERENCES room_types(id),building_id TEXT REFERENCES buildings(id),floor_id TEXT REFERENCES floors(id),number TEXT NOT NULL,view TEXT DEFAULT 'Garden view',cleaning TEXT NOT NULL DEFAULT 'Inspected',maintenance TEXT NOT NULL DEFAULT 'Good',overrides TEXT DEFAULT '[]',UNIQUE(property_id,number));
+CREATE TABLE IF NOT EXISTS guests(id TEXT PRIMARY KEY,name TEXT NOT NULL,email TEXT,phone TEXT,country TEXT DEFAULT 'India',vip INTEGER DEFAULT 0,preferences TEXT DEFAULT '',consent INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS hotel_users(id TEXT PRIMARY KEY,name TEXT NOT NULL,email TEXT UNIQUE NOT NULL,hash TEXT NOT NULL,role TEXT NOT NULL,property_ids TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS hotel_sessions(token TEXT PRIMARY KEY,user_id TEXT REFERENCES hotel_users(id),expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS reservations(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),guest_id TEXT NOT NULL REFERENCES guests(id),room_id TEXT NOT NULL REFERENCES rooms(id),type_id TEXT NOT NULL REFERENCES room_types(id),arrival TEXT NOT NULL,departure TEXT NOT NULL,adults INTEGER NOT NULL,children INTEGER NOT NULL DEFAULT 0,rate INTEGER NOT NULL CHECK(rate>=0),tax_rate INTEGER NOT NULL,status TEXT NOT NULL CHECK(status IN ('Confirmed','In house','Checked out','Cancelled')),source TEXT NOT NULL,notes TEXT DEFAULT '',request_id TEXT UNIQUE,request_hash TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,CHECK(arrival<departure));
+CREATE INDEX IF NOT EXISTS reservation_room_dates ON reservations(room_id,arrival,departure,status);
+CREATE INDEX IF NOT EXISTS reservation_property_dates ON reservations(property_id,arrival,departure,status);
+CREATE TABLE IF NOT EXISTS room_blocks(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),room_id TEXT NOT NULL REFERENCES rooms(id),start_date TEXT NOT NULL,end_date TEXT NOT NULL,reason TEXT NOT NULL,CHECK(start_date<end_date));
+CREATE TABLE IF NOT EXISTS folio_entries(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),reservation_id TEXT NOT NULL REFERENCES reservations(id),business_date TEXT NOT NULL,description TEXT NOT NULL,department TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('charge','payment','reversal')),debit INTEGER NOT NULL DEFAULT 0 CHECK(debit>=0),credit INTEGER NOT NULL DEFAULT 0 CHECK(credit>=0),net INTEGER NOT NULL DEFAULT 0,tax INTEGER NOT NULL DEFAULT 0,method TEXT,actor TEXT NOT NULL,request_id TEXT UNIQUE,request_hash TEXT,reversal_of TEXT UNIQUE REFERENCES folio_entries(id),created_at TEXT DEFAULT CURRENT_TIMESTAMP,CHECK((debit>0 AND credit=0) OR (credit>0 AND debit=0)));
+CREATE INDEX IF NOT EXISTS folio_property_date ON folio_entries(property_id,business_date);
+CREATE INDEX IF NOT EXISTS folio_reservation ON folio_entries(reservation_id);
+CREATE TABLE IF NOT EXISTS housekeeping_tasks(id TEXT PRIMARY KEY,property_id TEXT NOT NULL REFERENCES properties(id),room_id TEXT NOT NULL REFERENCES rooms(id),title TEXT NOT NULL,attendant TEXT,status TEXT DEFAULT 'Pending' CHECK(status IN ('Pending','In progress','Awaiting inspection','Completed')),priority TEXT DEFAULT 'Normal',started_at TEXT,completed_at TEXT,inspected_by TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS audit_events(id INTEGER PRIMARY KEY AUTOINCREMENT,property_id TEXT REFERENCES properties(id),actor TEXT NOT NULL,action TEXT NOT NULL,entity_id TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TRIGGER IF NOT EXISTS reservation_conflict_insert BEFORE INSERT ON reservations WHEN NEW.status!='Cancelled' BEGIN
+ SELECT RAISE(ABORT,'room_conflict') WHERE EXISTS(SELECT 1 FROM reservations r WHERE r.room_id=NEW.room_id AND r.status!='Cancelled' AND r.arrival<NEW.departure AND r.departure>NEW.arrival);
+ SELECT RAISE(ABORT,'room_blocked') WHERE EXISTS(SELECT 1 FROM room_blocks b WHERE b.room_id=NEW.room_id AND b.start_date<NEW.departure AND b.end_date>NEW.arrival);
+ SELECT RAISE(ABORT,'room_type_mismatch') WHERE NOT EXISTS(SELECT 1 FROM rooms x WHERE x.id=NEW.room_id AND x.property_id=NEW.property_id AND x.type_id=NEW.type_id);
+END;
+CREATE TRIGGER IF NOT EXISTS reservation_conflict_update BEFORE UPDATE OF room_id,arrival,departure,status ON reservations WHEN NEW.status!='Cancelled' BEGIN
+ SELECT RAISE(ABORT,'room_conflict') WHERE EXISTS(SELECT 1 FROM reservations r WHERE r.id!=NEW.id AND r.room_id=NEW.room_id AND r.status!='Cancelled' AND r.arrival<NEW.departure AND r.departure>NEW.arrival);
+ SELECT RAISE(ABORT,'room_blocked') WHERE EXISTS(SELECT 1 FROM room_blocks b WHERE b.room_id=NEW.room_id AND b.start_date<NEW.departure AND b.end_date>NEW.arrival);
+ SELECT RAISE(ABORT,'room_type_mismatch') WHERE NOT EXISTS(SELECT 1 FROM rooms x WHERE x.id=NEW.room_id AND x.property_id=NEW.property_id AND x.type_id=NEW.type_id);
+END;
+CREATE TRIGGER IF NOT EXISTS folio_no_update BEFORE UPDATE ON folio_entries BEGIN SELECT RAISE(ABORT,'Financial entries are immutable. Use a reversal.'); END;
+CREATE TRIGGER IF NOT EXISTS folio_no_delete BEFORE DELETE ON folio_entries BEGIN SELECT RAISE(ABORT,'Financial entries are immutable. Use a reversal.'); END;
+CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_events BEGIN SELECT RAISE(ABORT,'Audit records are immutable.'); END;
+CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit_events BEGIN SELECT RAISE(ABORT,'Audit records are immutable.'); END;
+INSERT OR IGNORE INTO schema_migrations(version) VALUES(1);

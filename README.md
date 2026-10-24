@@ -1,6 +1,22 @@
-# BrainADZ People
+# BrainADZ Hospitality OS + People
 
-A responsive HR workspace for **BrainADZ Marketing, BrainADZ Exhibits and BrainADZ Live**. Built with React, Vite, Express and persistent SQLite storage. The supplied company presentations informed the three verticals and their visual identities; sample personnel and policies are fictional.
+A local hospitality and people workspace built with React, Vite, Express and persistent SQLite storage. Hospitality OS follows the supplied BrainADZ Live visual identity; the preserved HR portal serves BrainADZ Marketing, Exhibits and Live. All seeded guests, employees, properties and policies are fictional.
+
+## Hospitality OS — operational foundation
+
+The default application at **/** is now **BrainADZ Hospitality OS**, with horizontal top navigation and the actual BrainADZ Live logo extracted from the supplied booklet. The existing HR application remains available at **/hr**. Its database, users, APIs and workflows are preserved.
+
+Use the same Windows `start-local.cmd` or `npm run local` launcher. It builds both interfaces and opens the hospitality workspace. In your browser, choose **Group owner**, **General manager**, **Front desk** or **Housekeeping**. The hospitality demo password is **Brainadz@123**; emails are `owner@brainadz.com`, `manager@brainadz.com`, `frontdesk@brainadz.com`, `housekeeping@brainadz.com` and `finance@brainadz.com`.
+
+The first hospitality cycle includes five fictional Indian properties, 200 physical rooms, separate room types and rate plans, 12 months of reconciled synthetic folio history, property-scoped hotel sessions, editable property policies and base rates, reservations, a day/week/month room calendar with validated drag-and-drop, check-in, immutable folio charges/payments/reversals, balance-gated checkout, account-statement downloads and inspection-gated housekeeping. Guest and property views and operational source-record exports are included. This is a scoped foundation release, not a completed enterprise PMS.
+
+Full accounting, tax invoices, automated night audit, deposits/refunds, restaurant POS, procurement, forecasting, OTA adapters, central/device offline sync, MFA, production hotel account provisioning and jurisdiction validation are **not implemented**. With `DEMO_MODE=false`, shared hotel demo sign-in is disabled; the HR administrator creation command does **not** provision hotel users. Hotel production onboarding requires a subsequent implementation. Planned modules are listed under **More**, with their status explicitly marked.
+
+Hotel data is saved separately to `.data/hospitality.sqlite`; `HOSPITALITY_DATABASE_PATH` overrides it. HR continues using `.data/brainadz.sqlite` / `DATABASE_PATH`. For Render, both databases must live on its persistent disk. An existing user updating from an older download should stop the server, keep the entire `.data` folder, replace application source files with the new download, and run the launcher again. Do not delete the database folder. The hotel migrations run automatically; repeat startup does not reseed existing data.
+
+The software and bundled assets can run from a local computer/LAN without internet after initial installation. This does not provide disconnected browser writes, a central queue or OTA sync. The room photo is generated illustrative demo imagery, not a photograph of any represented property. The logo is an actual crop of page 4 of the user-supplied BrainADZ Live PDF.
+
+See [requirements](docs/PRODUCT_REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [database](docs/DATABASE_SCHEMA.md), [metrics](docs/FINANCIAL_METRICS.md), [module status](docs/MODULE_STATUS.md), [roadmap](docs/IMPLEMENTATION_ROADMAP.md) and [test strategy](docs/TEST_STRATEGY.md).
 
 ## Run on your own computer
 
@@ -11,7 +27,7 @@ Install **Node.js 24 LTS** from https://nodejs.org. Download this repository usi
 - **Linux:** open a terminal in the extracted folder and run `sh start-local.command`.
 - **Any platform:** open a terminal in the extracted folder and run `npm run local`.
 
-The launcher installs dependencies if they are missing, builds the app, starts a server bound to your computer and opens **http://localhost:3000** in your default browser. Internet access is needed for the first dependency installation. Keep the terminal window open; press **Ctrl+C** to stop. The demo buttons are available on the login page. Local HTTP uses non-Secure cookies; hosted HTTPS continues using the configured secure-cookie setting.
+The launcher installs dependencies if they are missing, builds the app, starts a server bound to your computer and opens **http://localhost:3000** in your default browser. Internet access is needed for the first dependency installation. Keep the terminal window open; press **Ctrl+C** to stop. Hospitality demo buttons are available on the default login page; the original HR buttons are at /hr. Local HTTP uses non-Secure cookies; hosted HTTPS continues using the configured secure-cookie setting.
 
 Records are saved in `.data/brainadz.sqlite` in your local app folder. Keep that folder to retain your records. Render access and a Render API key are not needed to run locally. If port 3000 is occupied, run `npm run local -- --port=3002`. Use `--no-open` to start without opening a browser.
 

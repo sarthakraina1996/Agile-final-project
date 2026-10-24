@@ -68,7 +68,7 @@ async function main() {
     );
     probe.listen(port, '127.0.0.1', () => probe.close(done));
   });
-  console.log('\nBrainADZ People · Local workspace\n');
+  console.log('\nBrainADZ Hospitality OS · Local workspace\n');
   let dependenciesReady = existsSync(resolve(root, 'node_modules/.package-lock.json'));
   for (const dependency of ['express', 'react', 'vite']) {
     try {
@@ -102,7 +102,7 @@ async function main() {
       ready = true;
       clearInterval(readyTimer);
       console.log(
-        `\nYour app is ready: ${url}\nUse Admin, HR manager or Employee to explore the demo.\nKeep this window open. Press Ctrl+C to stop.\n`,
+        `\nYour app is ready: ${url}\nUse Group owner, General manager or Front desk to explore Hospitality OS. HR remains available at /hr.\nKeep this window open. Press Ctrl+C to stop.\n`,
       );
       if (shouldOpen) openBrowser(url);
     } catch {
