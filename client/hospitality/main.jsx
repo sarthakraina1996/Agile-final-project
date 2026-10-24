@@ -67,6 +67,7 @@ import {
   Finance,
 } from './operations';
 import './styles.css';
+import './workspace.css';
 const navigation = [
   ['dashboard', 'Dashboard', LayoutDashboard],
   ['reservations', 'Reservations', BookOpen],
@@ -79,14 +80,23 @@ const navigation = [
   ['properties', 'Multi-Property', Building2],
 ];
 const titles = {
-  reservations: ['Reservations', 'Every stay starts with a thoughtful welcome.'],
-  calendar: ['Booking calendar', 'A clear view of every room, every stay, every opportunity.'],
-  frontdesk: ['Front desk', 'Make every arrival feel like coming home.'],
-  rooms: ['Rooms & spaces', 'Every detail, ready for the next great stay.'],
-  housekeeping: ['Housekeeping management', 'A shared standard. A room that feels just right.'],
-  guests: ['Your guests', 'Recognise the person behind every reservation.'],
-  finance: ['Financial source records', 'From a guest posting to a clearer portfolio picture.'],
-  properties: ['Your property collection', 'Different destinations. One connected operation.'],
+  reservations: ['Reservations', 'Search bookings, review stays and manage room assignments.'],
+  calendar: ['Booking calendar', 'Room availability and reservations across your properties.'],
+  frontdesk: ['Front desk', 'Today’s arrivals, departures and guests in house.'],
+  rooms: ['Rooms & spaces', 'Room inventory, availability and maintenance status.'],
+  housekeeping: [
+    'Housekeeping management',
+    'Cleaning assignments, room status and supervisor inspections.',
+  ],
+  guests: ['Your guests', 'Guest profiles, contact details and stay history.'],
+  finance: [
+    'Financial source records',
+    'Guest charges, payments and the records behind your revenue.',
+  ],
+  properties: [
+    'Your property collection',
+    'Property settings, room counts and operating policies.',
+  ],
 };
 function Login({ onLogin }) {
   const [email, setEmail] = useState(''),
@@ -119,35 +129,34 @@ function Login({ onLogin }) {
       <section className="h-login-story">
         <Brand />
         <div className="h-login-story-copy">
-          <span className="h-eyebrow">THE ART OF A CONNECTED STAY</span>
+          <span className="h-eyebrow">BRAINADZ HOSPITALITY OS</span>
           <h1>
-            Remarkable hospitality.
+            Your properties.
             <br />
-            <em>Thoughtfully connected.</em>
+            One workspace.
           </h1>
           <p>
-            One clear view of your people, your properties,
+            Reservations, rooms and the people who keep
             <br />
-            and every possibility in between.
+            your properties running.
           </p>
           <div className="h-login-photo">
             <img src="/hospitality/deluxe-room.png" alt="Illustrative contemporary hotel room" />
-            <span>FROM THE FIRST WELCOME TO THE LAST DETAIL.</span>
+            <span>Property operations, from arrival to checkout.</span>
           </div>
         </div>
         <footer>
-          Intelligence for Hospitality. Control for Growth.<span>BrainADZ Live</span>
+          BrainADZ Group<span>Hospitality operations</span>
         </footer>
       </section>
       <section className="h-login-form-side">
         <div className="h-login-form">
-          <span className="h-login-emblem">✦</span>
-          <div className="h-eyebrow">WELCOME TO HOSPITALITY OS</div>
-          <h2>
-            Your entire operation.
-            <br />A little more in focus.
-          </h2>
-          <p>Sign in to your BrainADZ workspace.</p>
+          <div className="h-login-mobile-brand">
+            <Brand />
+          </div>
+          <div className="h-eyebrow">YOUR WORKSPACE</div>
+          <h2>Welcome back</h2>
+          <p>Sign in with your work account to continue.</p>
           <form onSubmit={login}>
             <label>
               Work email
@@ -182,8 +191,8 @@ function Login({ onLogin }) {
           </form>
           {demo && (
             <div className="h-demo-logins">
-              <span className="h-eyebrow">EXPLORE THE DEMONSTRATION</span>
-              <p>Five fictional properties. A real operational workflow.</p>
+              <span className="h-eyebrow">TRY A DEMO ACCOUNT</span>
+              <p>Explore five sample properties with a role below.</p>
               <div>
                 {[
                   ['owner', 'Group owner'],
@@ -206,7 +215,7 @@ function Login({ onLogin }) {
           </a>
         </div>
         <span className="h-login-security">
-          <ShieldCheck size={14} /> Protected access. A connected local workplace.
+          <ShieldCheck size={14} /> BrainADZ Hospitality OS
         </span>
       </section>
     </div>
@@ -557,7 +566,7 @@ function App() {
       <div className="h-loading">
         <Brand />
         <span />
-        <p>Bringing your properties into focus…</p>
+        <p>Loading workspace…</p>
       </div>
     );
   if (!data)
@@ -587,10 +596,8 @@ function App() {
         <div className="h-global-top">
           <Brand />
           <div className="h-header-context">
-            <span className="h-header-label">YOUR WORKSPACE</span>
-            <span>
-              Hospitality OS <i>·</i> Foundation release
-            </span>
+            <span className="h-header-label">WORKSPACE</span>
+            <span>BrainADZ Group</span>
           </div>
           <div className="h-header-tools">
             <button className="h-global-search" onClick={() => setModal({ type: 'search' })}>
@@ -628,16 +635,23 @@ function App() {
             <button
               className="h-icon-button h-mobile-nav-button"
               aria-label="Open module navigation"
+              aria-expanded={menu}
+              aria-controls="hospitality-modules"
               onClick={() => setMenu(!menu)}
             >
-              <Menu size={21} />
+              {menu ? <X size={21} /> : <Menu size={21} />}
             </button>
           </div>
         </div>
         <div className={'h-nav-strip ' + (menu ? 'open' : '')}>
-          <nav aria-label="Hospitality modules">
+          <nav id="hospitality-modules" aria-label="Hospitality modules">
             {visibleNav.map(([id, label, Icon]) => (
-              <button key={id} className={page === id ? 'active' : ''} onClick={() => go(id)}>
+              <button
+                key={id}
+                className={page === id ? 'active' : ''}
+                aria-current={page === id ? 'page' : undefined}
+                onClick={() => go(id)}
+              >
                 <Icon size={14} />
                 {label}
                 {id === 'frontdesk' && (
@@ -658,20 +672,16 @@ function App() {
             </button>
           </nav>
           <span className="h-nav-demo">
-            <i /> DEMO DATA
+            <i /> Demo workspace
           </span>
         </div>
       </header>
       <main className="h-main">
         <div className="h-context-bar">
           <div className="h-breadcrumb">
-            <span>WORKSPACE</span>
+            <span>Hospitality</span>
             <ChevronRight size={10} />
-            <b>
-              {page === 'dashboard'
-                ? 'GROUP OVERVIEW'
-                : titles[page]?.[0]?.toUpperCase() || 'OVERVIEW'}
-            </b>
+            <b>{page === 'dashboard' ? 'Group overview' : titles[page]?.[0] || 'Overview'}</b>
           </div>
           <div className="h-global-filters">
             <div className="h-property-select">
@@ -754,9 +764,6 @@ function App() {
         {page !== 'dashboard' && !selectedRoom && (
           <div className="h-page-title">
             <div>
-              <div className="h-eyebrow">
-                {page === 'finance' ? 'CLARITY BEHIND EVERY NUMBER' : 'EVERY DETAIL, CONNECTED'}
-              </div>
               <h1>{titles[page]?.[0] || 'Overview'}</h1>
               <p>{titles[page]?.[1]}</p>
             </div>
@@ -1082,8 +1089,8 @@ function App() {
       )}{' '}
       {modal?.type === 'notifications' && (
         <Modal
-          title="On your radar"
-          subtitle="The current state of your property operations."
+          title="Operations updates"
+          subtitle="Pending arrivals and room tasks."
           onClose={() => setModal(null)}
         >
           <div className="h-notifications">
@@ -1255,7 +1262,7 @@ function TaskForm({ data, onClose, onSave }) {
   }
   return (
     <Modal
-      title="A room ready to welcome"
+      title="New cleaning task"
       subtitle="Create a cleaning and inspection task."
       onClose={onClose}
     >

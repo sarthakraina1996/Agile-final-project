@@ -19,7 +19,7 @@ export function Brand({ inverse = false }) {
       <img src="/hospitality/brainadz-live.png" alt="BrainADZ Live — From Vision to Visibility" />
       <span className="h-brand-divider" />
       <span>
-        HOSPITALITY<span>OPERATING SYSTEM</span>
+        Hospitality OS<span>PROPERTY OPERATIONS</span>
       </span>
     </a>
   );
@@ -181,9 +181,11 @@ export function Kpi({ label, value, previous, icon: Icon, tone = 'blue', note, o
     <button className={'h-kpi ' + (!onClick ? 'inert' : '')} onClick={onClick} disabled={!onClick}>
       <div>
         <span>{label}</span>
-        <i className={tone}>
-          <Icon size={18} />
-        </i>
+        {Icon && (
+          <i className={tone}>
+            <Icon size={18} />
+          </i>
+        )}
       </div>
       <strong>{value}</strong>
       <footer>

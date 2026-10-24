@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { money, dateFormat } from './lib';
-const colors = ['#1378ed', '#39b5b0', '#ffc668', '#9e8bda', '#e87e8a'];
+const colors = ['#346a93', '#3b8376', '#b68b43', '#817594', '#b57668'];
+const departments = ['Rooms', 'F&B', 'Spa', 'Banquets', 'Other'];
+const sum = (d) => departments.reduce((total, dept) => total + (d[dept] || 0), 0);
 export function RevenueChart({ data, currency = 'INR' }) {
   const [hover, setHover] = useState(null);
-  const w = 760,
-    h = 225,
-    pad = 35,
+  const ref = useRef(null);
+  const [w, setWidth] = useState(760);
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(Math.max(280, entry.contentRect.width)),
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  const h = 225,
+    pad = 42,
     max =
       Math.max(
         1,
@@ -18,19 +28,19 @@ export function RevenueChart({ data, currency = 'INR' }) {
     pad + (i * (w - pad * 2)) / Math.max(1, data.length - 1),
     h - pad - (v / max) * (h - pad * 1.5),
   ];
-  const lines = ['Rooms', 'F&B', 'Spa'].map((dept, index) => ({
+  const lines = ['Total', 'Rooms', 'F&B'].map((dept, index) => ({
     dept,
-    color: colors[index],
-    points: data.map((d, i) => point(d[dept] || 0, i)),
+    color: index === 0 ? '#142f45' : colors[index - 1],
+    points: data.map((d, i) => point(dept === 'Total' ? sum(d) : d[dept] || 0, i)),
   }));
   const selected = hover === null ? null : data[hover];
   return (
-    <div className="h-linechart">
+    <div className="h-linechart" ref={ref}>
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Posted revenue by date and department">
         <defs>
           <linearGradient id="h-revenue-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#187cf0" stopOpacity=".15" />
-            <stop offset="100%" stopColor="#187cf0" stopOpacity=".01" />
+            <stop offset="0%" stopColor="#346a93" stopOpacity=".09" />
+            <stop offset="100%" stopColor="#346a93" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0, 1, 2, 3, 4].map((i) => (
@@ -40,15 +50,14 @@ export function RevenueChart({ data, currency = 'INR' }) {
               x2={w - pad}
               y1={point((i * max) / 4, 0)[1]}
               y2={point((i * max) / 4, 0)[1]}
-              stroke="#eaf0f6"
-              strokeDasharray="3 4"
+              stroke="#e8ebed"
             />
             <text
               x={pad - 8}
               y={point((i * max) / 4, 0)[1] + 3}
               textAnchor="end"
               fill="#98a6b7"
-              fontSize="9"
+              fontSize="11"
             >
               {money((i * max) / 4, currency, true)}
             </text>
@@ -70,7 +79,13 @@ export function RevenueChart({ data, currency = 'INR' }) {
               strokeLinejoin="round"
             />
             {points.map((p, i) => (
-              <circle key={i} cx={p[0]} cy={p[1]} r={index ? 2.2 : 3} fill={color} />
+              <circle
+                key={i}
+                cx={p[0]}
+                cy={p[1]}
+                r={hover === i ? 4 : index ? 0 : 2.5}
+                fill={color}
+              />
             ))}
           </g>
         ))}
@@ -85,8 +100,8 @@ export function RevenueChart({ data, currency = 'INR' }) {
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover(null)}
             />
-            {(data.length < 8 || i % 2 === 0) && (
-              <text x={point(0, i)[0]} y={h - 12} textAnchor="middle" fill="#98a6b7" fontSize="9">
+            {i % Math.max(1, Math.ceil(data.length / (w < 450 ? 4 : 7))) === 0 && (
+              <text x={point(0, i)[0]} y={h - 12} textAnchor="middle" fill="#687582" fontSize="11">
                 {dateFormat(d.date)}
               </text>
             )}
@@ -96,47 +111,47 @@ export function RevenueChart({ data, currency = 'INR' }) {
       {selected && (
         <div className="h-chart-tooltip">
           {dateFormat(selected.date)}
-          <b>{money(selected.Rooms + selected['F&B'] + selected.Spa, currency)}</b>
+          <b>{money(sum(selected), currency)}</b>
+          <span>Total posted revenue</span>
         </div>
       )}
       <div className="h-chart-legend">
         {lines.map((l) => (
           <span key={l.dept}>
             <i style={{ background: l.color }} />
-            {l.dept === 'Rooms' ? 'Room revenue' : l.dept + ' revenue'}
+            {l.dept === 'Total' ? 'All departments' : l.dept}
           </span>
         ))}
       </div>
     </div>
   );
 }
-export function Donut({ data, currency = 'INR', label = 'Operating revenue' }) {
+export function DepartmentMix({ data, onSelect }) {
   const total = data.reduce((s, d) => s + Math.max(0, d.value), 0);
-  let angle = 0;
-  const stops = data.map((d, i) => {
-    const start = angle;
-    angle += total ? (Math.max(0, d.value) / total) * 100 : 0;
-    return `${colors[i % colors.length]} ${start}% ${angle}%`;
-  });
   return (
-    <div className="h-donut-layout">
-      <div
-        className="h-donut"
-        style={{ background: total ? `conic-gradient(${stops.join(',')})` : '#edf1f6' }}
-      >
-        <div>
-          <span>REVENUE MIX</span>
-          <strong>{money(total, currency, true)}</strong>
-          <small>Net of tax</small>
-        </div>
-      </div>
-      <div className="h-donut-key">
+    <div className="h-department-mix">
+      <div className="h-section-caption">Revenue by department</div>
+      <div className="h-mix-bar" aria-hidden="true">
         {data.map((d, i) => (
-          <div key={d.name}>
-            <i style={{ background: colors[i % colors.length] }} />
-            <span>{d.name}</span>
+          <span
+            key={d.name}
+            style={{ flex: Math.max(0, d.value), background: colors[i % colors.length] }}
+          />
+        ))}
+      </div>
+      <div className="h-mix-key">
+        {data.map((d, i) => (
+          <button
+            key={d.name}
+            onClick={() => onSelect(d.name)}
+            aria-label={`View ${d.name} revenue sources`}
+          >
+            <span>
+              <i style={{ background: colors[i % colors.length] }} />
+              {d.name}
+            </span>
             <b>{total ? ((Math.max(0, d.value) / total) * 100).toFixed(1) : '0'}%</b>
-          </div>
+          </button>
         ))}
       </div>
     </div>

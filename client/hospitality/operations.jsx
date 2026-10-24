@@ -255,7 +255,7 @@ export function RoomList({ data, onSelect, onEditRate }) {
             <div className="h-room-toolbar">
               <div>
                 <h2>Room inventory</h2>
-                <p>Every room, thoughtfully managed.</p>
+                <p>Availability, room status and nightly rates.</p>
               </div>
               <SearchField
                 value={q}
@@ -586,7 +586,7 @@ export function Guests({ data, onSelect }) {
   return (
     <Panel
       title="Guest directory"
-      subtitle="Thoughtful service starts with knowing your guests."
+      subtitle="Contact details and preferences for guests at your properties."
       action={
         <SearchField
           value={q}
@@ -670,7 +670,9 @@ export function PropertyPortfolio({ data, onProperty, onEdit }) {
               <span>{p.city.toUpperCase()}</span>
             </div>
             <div className="h-property-body">
-              <span className="h-eyebrow">{p.code} · INDIA COLLECTION</span>
+              <span className="h-eyebrow">
+                {p.code} · {p.country}
+              </span>
               <h2>{p.name}</h2>
               <p>
                 <MapPin size={13} />

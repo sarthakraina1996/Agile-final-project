@@ -1175,8 +1175,8 @@ svg {
 }
 .h-mono {
   font-family: monospace;
-  font-size: 8px !important;
-  color: #9cadc4 !important;
+  font-size: 11px;
+  color: #697986;
 }
 .h-small-action {
   background: #edf5ff;
