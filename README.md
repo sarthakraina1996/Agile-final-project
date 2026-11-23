@@ -2,6 +2,10 @@
 
 A local hospitality and people workspace built with React, Vite, Express and persistent SQLite storage. Hospitality OS follows the supplied BrainADZ Live visual identity; the preserved HR portal serves BrainADZ Marketing, Exhibits and Live. All seeded guests, employees, properties and policies are fictional.
 
+## Workout Tracker (separate app)
+
+[`workout/`](workout/README.md) contains a standalone, local-first workout tracker PWA (React, TypeScript, Vite, IndexedDB). It has its own `package.json` and does not share code, data or servers with the apps described in this README. See [workout/README.md](workout/README.md) to run or install it and [workout/VERIFICATION.md](workout/VERIFICATION.md) for test results.
+
 ## Hospitality OS — operational foundation
 
 The default application at **/** is now **BrainADZ Hospitality OS**, with horizontal top navigation and the actual BrainADZ Live logo extracted from the supplied booklet. The existing HR application remains available at **/hr**. Its database, users, APIs and workflows are preserved.
